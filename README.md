@@ -20,6 +20,18 @@ ActivityRings(
     lineWidth: 12 // the line width of each ring
 )
 ```
+ 
+ You can also add a single ring.
+ 
+ ```swift
+ OneActivityRing(
+    value: 0.75,
+    style: Color.green,
+    lineWidth: 20
+ )
+ ```
+
+                 
 ### Features
 - You can add as many or few rings as you like.
 - Each ring has a customizable `ShapeStyle` (color).
