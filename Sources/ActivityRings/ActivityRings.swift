@@ -4,6 +4,16 @@ import SwiftUI
 /// A view that displays multiple concentric activity rings, similar to Apple's Activity app.
 /// Each ring represents a different metric and can be customized with different colors and values.
 public struct ActivityRings: View {
+    public init(
+        lineWidth: CGFloat = 4,
+        ringSpacing: CGFloat = 0,
+        rings: [ActivityRingConfig]
+    ) {
+        self.rings = rings
+        self.ringSpacing = ringSpacing
+        self.lineWidth = lineWidth
+    }
+    
     /// Configuration for each activity ring to be displayed.
     /// Rings are displayed from outside to inside in the order provided.
     public var rings: [ActivityRingConfig]
@@ -76,14 +86,12 @@ struct ActivityRingsExample: View {
             List {
                 // Display the ActivityRings component
                 ActivityRings(
-                    rings: [
+                    lineWidth: lineWidth, ringSpacing: ringSpacing, rings: [
                         ActivityRingConfig(value: ring1Value, style: Color.red),
                         ActivityRingConfig(value: ring2Value, style: Color.green),
                         ActivityRingConfig(value: ring3Value, style: Color.blue),
                         ActivityRingConfig(value: ring4Value, style: Color.purple)
-                    ],
-                    ringSpacing: ringSpacing,
-                    lineWidth: lineWidth
+                    ]
                 )
                 .frame(width: 250, height: 250)
                 .padding()

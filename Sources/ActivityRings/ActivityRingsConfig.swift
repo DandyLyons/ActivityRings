@@ -17,7 +17,7 @@ public struct ActivityRingConfig: Identifiable {
     public var style: AnyShapeStyle
     
     
-    init(value: Double, style: some ShapeStyle) {
+    public init(value: Double, style: some ShapeStyle) {
         self.value = value
         self.style = AnyShapeStyle(style)
     }

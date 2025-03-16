@@ -22,11 +22,9 @@ public struct OneActivityRing: View {
     
     public var body: some View {
         ActivityRings(
-            rings: [
+            lineWidth: lineWidth, ringSpacing: 0, rings: [
                 .init(value: value, style: style)
-            ],
-            ringSpacing: 0,
-            lineWidth: lineWidth
+            ]
         )
     }
 }
