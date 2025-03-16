@@ -2,6 +2,7 @@
 
 A SwiftUI View that mimics the look and feel of Apple's Activity Rings from the Activity watchOS app. (This SwiftUI view can be used to display any kind of percentage data.)
 
+![Example Image](https://github.com/DandyLyons/ActivityRings/blob/main/Example.png?raw=true)
 
 ## Usage
 > [!WARNING]
