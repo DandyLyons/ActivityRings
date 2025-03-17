@@ -1,22 +1,39 @@
-
+import IdentifiedCollections
 import SwiftUI
 
 /// A view that displays multiple concentric activity rings, similar to Apple's Activity app.
 /// Each ring represents a different metric and can be customized with different colors and values.
 public struct ActivityRings: View {
+    /// Creates an ``ActivityRings`` View
+    /// - Parameters:
+    ///   - lineWidth: the width of each ring's line.
+    ///   - ringSpacing: the padding between each ring.
+    ///   - rings: The percentage value and styling of each ring. Note: Internally, this initializer uses the Array
+    ///   index of each element to create a stable id. This means that adding or removing ``ActivityRingConfig``
+    ///   elements could produce surprising animation behaviors. For more info see ``ActivityRings/rings``. 
     public init(
         lineWidth: CGFloat = 4,
         ringSpacing: CGFloat = 0,
         rings: [ActivityRingConfig]
     ) {
-        self.rings = rings
+        var id_rings = IdentifiedArrayOf<ActivityRingsConfigWithID>()
+        for (index, ring) in rings.enumerated() {
+            id_rings.append(ActivityRingsConfigWithID(id: index, config: ring))
+        }
+        self.rings = id_rings
         self.ringSpacing = ringSpacing
         self.lineWidth = lineWidth
     }
     
     /// Configuration for each activity ring to be displayed.
     /// Rings are displayed from outside to inside in the order provided.
-    public var rings: [ActivityRingConfig]
+    ///
+    /// Note:
+    /// Internally, ``ActivityRings``, uses the Array indices to generate stable ids for animations.
+    /// This means that you can safely mutate the ``ActivityRingConfig``'s `value` and `style` and the
+    /// correct ring will update. However, this also means that if you add or remove rings, then this may generate
+    /// surprising behavior. For example, if the first ring is removed, then the second ring would become the first ring, and would now have the same id that the first ring used to have.
+    var rings: IdentifiedArrayOf<ActivityRingsConfigWithID>
     
     /// The spacing between adjacent rings in points.
     /// Positive values create space between rings, while negative values can create overlapping effects.
@@ -31,11 +48,11 @@ public struct ActivityRings: View {
         GeometryReader { geometry in
             ZStack {
                 // Create rings from outside to inside
-                ForEach(Array(rings.enumerated()), id: \.element.id) { index, ring in
+                ForEach(rings) { ring in
                     ActivityRingView(
                         value: ring.value,
                         style: ring.style,
-                        diameter: diameter(for: index, in: geometry.size),
+                        diameter: diameter(for: ring.id, in: geometry.size),
                         lineWidth: lineWidth
                     )
                 }
