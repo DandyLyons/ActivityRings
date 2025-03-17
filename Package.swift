@@ -14,11 +14,18 @@ let package = Package(
             name: "ActivityRings",
             targets: ["ActivityRings"]),
     ],
+    dependencies: [
+        .package(url: "https://github.com/pointfreeco/swift-identified-collections.git", from: "1.1.1"),
+    ],
     targets: [
         // Targets are the basic building blocks of a package, defining a module or a test suite.
         // Targets can depend on other targets in this package and products from dependencies.
         .target(
-            name: "ActivityRings"),
+            name: "ActivityRings",
+            dependencies: [
+                .product(name: "IdentifiedCollections", package: "swift-identified-collections"),
+            ]
+        ),
         .testTarget(
             name: "ActivityRingsTests",
             dependencies: ["ActivityRings"]
