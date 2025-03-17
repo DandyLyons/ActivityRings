@@ -9,9 +9,15 @@ import Foundation
 import SwiftUI
 
 /// A single activity ring.
+///
+/// The frame of the SwiftUI View will determine the ring's diameter. The View will try to take up as much space
+/// as it is given. 
 public struct OneActivityRing: View {
+    /// A `Double` representing a percentage, as a value between 0 (0%) and 1 (100%).
     let value: Double
+    /// The appearance of the ring
     let style: AnyShapeStyle
+    /// the width of the ring's line.
     let lineWidth: CGFloat
     
     public init(value: Double, style: some ShapeStyle, lineWidth: CGFloat) {

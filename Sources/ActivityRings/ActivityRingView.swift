@@ -9,7 +9,6 @@ import Foundation
 import SwiftUI
 
 /// A customizable circular ring view that displays progress similar to Apple's Activity Rings.
-/// This view can represent progress up to 200% of the target value.
 struct ActivityRingView: View {
     /// The progress value to display, represented as a percentage (0-200).
     /// Values above 100% will cause the ring to overlap itself.
@@ -28,7 +27,7 @@ struct ActivityRingView: View {
     /// Calculated trim value that converts the percentage input to a value between 0 and 2.
     /// - Returns: A CGFloat clamped between 0 and 2, representing up to 200% completion.
     private var trimValue: CGFloat {
-        return min(max(CGFloat(value) / 100.0, 0.0), 2.0) // Limit to 200% maximum
+        return min(max(CGFloat(value), 0.0), 2.0) // Limit to 200% maximum
     }
     
     /// The rendered view body that constructs the activity ring.

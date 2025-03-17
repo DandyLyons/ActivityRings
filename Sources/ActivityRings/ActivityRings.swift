@@ -16,24 +16,14 @@ public struct ActivityRings: View {
         ringSpacing: CGFloat = 0,
         rings: [ActivityRingConfig]
     ) {
-        var id_rings = IdentifiedArrayOf<ActivityRingsConfigWithID>()
-        for (index, ring) in rings.enumerated() {
-            id_rings.append(ActivityRingsConfigWithID(id: index, config: ring))
-        }
-        self.rings = id_rings
+        self.rings = rings.asIDArray()
         self.ringSpacing = ringSpacing
         self.lineWidth = lineWidth
     }
     
     /// Configuration for each activity ring to be displayed.
     /// Rings are displayed from outside to inside in the order provided.
-    ///
-    /// Note:
-    /// Internally, ``ActivityRings``, uses the Array indices to generate stable ids for animations.
-    /// This means that you can safely mutate the ``ActivityRingConfig``'s `value` and `style` and the
-    /// correct ring will update. However, this also means that if you add or remove rings, then this may generate
-    /// surprising behavior. For example, if the first ring is removed, then the second ring would become the first ring, and would now have the same id that the first ring used to have.
-    var rings: IdentifiedArrayOf<ActivityRingsConfigWithID>
+    var rings: IdentifiedArrayOf<ActivityRingConfig>
     
     /// The spacing between adjacent rings in points.
     /// Positive values create space between rings, while negative values can create overlapping effects.
@@ -52,7 +42,10 @@ public struct ActivityRings: View {
                     ActivityRingView(
                         value: ring.value,
                         style: ring.style,
-                        diameter: diameter(for: ring.id, in: geometry.size),
+                        diameter: diameter(
+                            for: rings.index(id: ring.id) ?? -1,
+                            in: geometry.size
+                        ),
                         lineWidth: lineWidth
                     )
                 }
@@ -68,6 +61,10 @@ public struct ActivityRings: View {
     ///   - size: The available size for the entire view.
     /// - Returns: The calculated diameter for the ring at the given index.
     private func diameter(for index: Int, in size: CGSize) -> CGFloat {
+        guard index >= 0 else {
+            assertionFailure("index should be 0 or higher")
+            return 0
+        }
         let maxDiameter = min(size.width, size.height)
         let totalReducedDiameter = CGFloat(rings.count - 1) * (lineWidth + ringSpacing)
         let outerDiameter = maxDiameter - totalReducedDiameter
@@ -78,6 +75,7 @@ public struct ActivityRings: View {
 
 /// A demo view that showcases the ActivityRings component with interactive controls.
 /// This view allows adjusting ring values, spacing, and line width in real-time.
+@available(iOS 16.0, *)
 struct ActivityRingsExample: View {
     /// Spacing between adjacent rings, controlled by a slider.
     @State private var ringSpacing: CGFloat = 0
@@ -86,16 +84,16 @@ struct ActivityRingsExample: View {
     @State private var lineWidth: CGFloat = 20
     
     /// Value for the red (outermost) ring, representing percentage completion.
-    @State private var ring1Value: Double = 85
+    @State private var ring1Value: Double = 0.85
     
     /// Value for the green (second) ring, representing percentage completion.
-    @State private var ring2Value: Double = 110
+    @State private var ring2Value: Double = 0.61
     
     /// Value for the blue (third) ring, representing percentage completion.
-    @State private var ring3Value: Double = 45
+    @State private var ring3Value: Double = 0.45
     
     /// Value for the purple (innermost) ring, representing percentage completion.
-    @State private var ring4Value: Double = -5
+    @State private var ring4Value: Double = 0.0
     
     /// The view body that renders the interactive demo.
     var body: some View {
@@ -103,12 +101,12 @@ struct ActivityRingsExample: View {
             List {
                 // Display the ActivityRings component
                 ActivityRings(
-                    lineWidth: lineWidth, ringSpacing: ringSpacing, rings: [
+                    lineWidth: lineWidth, ringSpacing: ringSpacing, rings: .autoIncrementing([
                         ActivityRingConfig(value: ring1Value, style: Color.red),
                         ActivityRingConfig(value: ring2Value, style: Color.green),
                         ActivityRingConfig(value: ring3Value, style: Color.blue),
                         ActivityRingConfig(value: ring4Value, style: Color.purple)
-                    ]
+                    ])
                 )
                 .frame(width: 250, height: 250)
                 .padding()
@@ -121,35 +119,35 @@ struct ActivityRingsExample: View {
                 VStack(spacing: 16) {
                     VStack {
                         Text("Ring Spacing: \(ringSpacing) points")
-                        Slider(value: $ringSpacing, in: -10...150)
+                        Slider(value: $ringSpacing, in: -1...2)
                     }
                     
                     VStack {
                         Text("Line Width: \(lineWidth) points")
-                        Slider(value: $lineWidth, in: -10...150)
+                        Slider(value: $lineWidth, in: -1...2)
                     }
                     
                     VStack {
-                        Text("Red Ring: \(Int(ring1Value))%")
-                        Slider(value: $ring1Value, in: -10...150)
+                        Text("Red Ring: \(ring1Value.formatted(percentFormatStyle))")
+                        Slider(value: $ring1Value, in: 0...2)
                             .tint(.red)
                     }
                     
                     VStack {
-                        Text("Green Ring: \(Int(ring2Value))%")
-                        Slider(value: $ring2Value, in: -10...150)
+                        Text("Green Ring: \(ring2Value.formatted(percentFormatStyle))")
+                        Slider(value: $ring2Value, in: 0...2)
                             .tint(.green)
                     }
                     
                     VStack {
-                        Text("Blue Ring: \(Int(ring3Value))%")
-                        Slider(value: $ring3Value, in: -10...150)
+                        Text("Blue Ring: \(ring3Value.formatted(percentFormatStyle))")
+                        Slider(value: $ring3Value, in: 0...2)
                             .tint(.blue)
                     }
                     
                     VStack {
-                        Text("Purple Ring: \(Int(ring4Value))%")
-                        Slider(value: $ring4Value, in: -10...150)
+                        Text("Purple Ring: \(ring4Value.formatted(percentFormatStyle))")
+                        Slider(value: $ring4Value, in: 0...2)
                             .tint(.purple)
                     }
                 }
@@ -158,8 +156,17 @@ struct ActivityRingsExample: View {
             .navigationTitle("ActivityRings Demo")
         }
     }
+    
+    var percentFormatStyle: FloatingPointFormatStyle<Double>.Percent {
+        return .percent.precision(.fractionLength(0...2))
+    }
 }
 
 #Preview {
-    ActivityRingsExample()
+    if #available(iOS 16.0, *) {
+        ActivityRingsExample()
+    } else {
+        // Fallback on earlier versions
+        Text("Preview in iOS 16 or higher")
+    }
 }
